@@ -196,9 +196,13 @@ public final class Main {
         if (args.length <= 0) {
             System.out.println("Usage:");
             System.out.println("class-version.bat <file>");
+            System.out.println("  (<file> can be a .jar, .class or directory)");
             System.out.println("class-version.bat <URL>");
+            System.out.println("  (<URL> can point to a .jar or .class)");
             System.out.println("class-version.bat <group>:<artifact>:<version>[:<classifier>]");
+            System.out.println("  (uses " + MAVEN_BASE_URL + " as a jar source)");
             System.out.println("class-version.bat <scope>(\"<group>:<artifact>:<version>[:<classifier>]\")");
+            System.out.println("  (<scope> is ignored)");
             return;
         }
         for (String arg : args) {
