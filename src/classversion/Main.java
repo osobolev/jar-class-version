@@ -162,23 +162,31 @@ public final class Main {
             detectUriClassVersion(dep.toString(), dep.toMavenURI());
             return;
         }
+        URI uri = null;
         try {
-            URI uri = URI.create(arg);
-            if (uri.getScheme() != null) {
-                detectUriClassVersion(arg, uri);
-                return;
+            URI tryUri = URI.create(arg);
+            if (tryUri.getScheme() != null) {
+                uri = tryUri;
             }
         } catch (Exception ex) {
             // ignore
         }
+        if (uri != null) {
+            detectUriClassVersion(arg, uri);
+            return;
+        }
+        Path path = null;
         try {
-            Path path = Path.of(arg);
-            if (Files.exists(path)) {
-                detectFileClassVersion(null, path);
-                return;
+            Path tryPath = Path.of(arg);
+            if (Files.exists(tryPath)) {
+                path = tryPath;
             }
         } catch (Exception ex) {
             // ignore
+        }
+        if (path != null) {
+            detectFileClassVersion(null, path);
+            return;
         }
         System.err.printf("'%s' is not an URL, file or dependency%n", arg);
     }
