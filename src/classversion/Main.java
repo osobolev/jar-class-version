@@ -107,7 +107,26 @@ public final class Main {
         }
     }
 
-    private static URI dependencyURI(String arg) {
+    private record Dependency(String group, String artifact, String version, String classifier) {
+
+        @Override
+        public String toString() {
+            return String.format(
+                "%s:%s:%s%s",
+                group, artifact, version, classifier == null ? "" : ":" + classifier
+            );
+        }
+
+        URI toMavenURI() {
+            return URI.create(String.format(
+                "https://repo1.maven.org/maven2/%s/%s/%s/%s-%s%s.jar",
+                group.replace('.', '/'), artifact, version,
+                artifact, version, classifier == null ? "" : "-" + classifier
+            ));
+        }
+    }
+
+    private static Dependency parseDependency(String arg) {
         Matcher matcher = DEPENDENCY.matcher(arg);
         if (!matcher.matches())
             return null;
@@ -115,11 +134,7 @@ public final class Main {
         String artifact = matcher.group(2);
         String version = matcher.group(3);
         String classifier = matcher.group(4);
-        return URI.create(String.format(
-            "https://repo1.maven.org/maven2/%s/%s/%s/%s-%s%s.jar",
-            group.replace('.', '/'), artifact, version,
-            artifact, version, classifier == null ? "" : "-" + classifier
-        ));
+        return new Dependency(group, artifact, version, classifier);
     }
 
     private static void detectClassVersion(String arg) throws IOException {
@@ -130,9 +145,9 @@ public final class Main {
         } else {
             depArg = arg;
         }
-        URI mavenUri = dependencyURI(depArg);
-        if (mavenUri != null) {
-            detectClassVersion(arg, mavenUri);
+        Dependency dep = parseDependency(depArg);
+        if (dep != null) {
+            detectClassVersion(dep.toString(), dep.toMavenURI());
             return;
         }
         try {
