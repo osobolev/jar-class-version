@@ -136,10 +136,14 @@ public final class Main {
         } catch (Exception ex) {
             // ignore
         }
-        Path path = Path.of(arg);
-        if (Files.exists(path)) {
-            detectClassVersion(null, path);
-            return;
+        try {
+            Path path = Path.of(arg);
+            if (Files.exists(path)) {
+                detectClassVersion(null, path);
+                return;
+            }
+        } catch (Exception ex) {
+            // ignore
         }
         System.err.printf("'%s' is not an URL, file or dependency%n", arg);
     }
