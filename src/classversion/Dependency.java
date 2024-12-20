@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 record Dependency(String group, String artifact, String version, String classifier) {
 
     private static final Pattern DEPENDENCY_WRAPPER = Pattern.compile("['\"]?\\w+['\"]?\\s*\\(\\s*['\"]?(.*)['\"]?\\s*\\)");
-    private static final Pattern DEPENDENCY = Pattern.compile("([\\w.]+):([\\w.]+):([\\w.]+)(:[\\w.]+)?");
+    private static final Pattern DEPENDENCY = Pattern.compile("([\\w-.]+):([\\w-.]+):([\\w-.]+)(:[\\w-.]+)?");
 
     static final String MAVEN_BASE_URL = "https://repo1.maven.org/maven2";
 
