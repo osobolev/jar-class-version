@@ -17,7 +17,7 @@ import java.util.zip.ZipInputStream;
 @SuppressWarnings("UseOfSystemOutOrSystemErr")
 public final class Main {
 
-    private static final Pattern DEPENDENCY = Pattern.compile("([^:]+):([^:]+):([^:]+)(:[^:]+)?");
+    private static final Pattern DEPENDENCY = Pattern.compile("([\\w.]+):([\\w.]+):([\\w.]+)(:[\\w.]+)?");
 
     private static String javaVersion(int major, int minor) {
         if (major >= 49) {
