@@ -84,19 +84,19 @@ public final class Main {
         System.out.printf("%s: %s%n", name, version);
     }
 
-    private static void detectClassVersion(String name, URI uri) throws IOException {
+    private static void detectUriClassVersion(String name, URI uri) throws IOException {
         URLConnection conn = uri.toURL().openConnection();
         try (InputStream is = conn.getInputStream()) {
             detectClassVersion(name, is);
         }
     }
 
-    private static void detectClassVersion(Path root, Path path) throws IOException {
+    private static void detectFileClassVersion(Path root, Path path) throws IOException {
         if (Files.isDirectory(path)) {
             Path newRoot = root == null ? path : root;
             try (DirectoryStream<Path> paths = Files.newDirectoryStream(path)) {
                 for (Path child : paths) {
-                    detectClassVersion(newRoot, child);
+                    detectFileClassVersion(newRoot, child);
                 }
             }
         } else {
@@ -151,13 +151,13 @@ public final class Main {
     private static void detectClassVersion(String arg) throws IOException {
         Dependency dep = parseDependency(arg);
         if (dep != null) {
-            detectClassVersion(dep.toString(), dep.toMavenURI());
+            detectUriClassVersion(dep.toString(), dep.toMavenURI());
             return;
         }
         try {
             URI uri = URI.create(arg);
             if (uri.getScheme() != null) {
-                detectClassVersion(arg, uri);
+                detectUriClassVersion(arg, uri);
                 return;
             }
         } catch (Exception ex) {
@@ -166,7 +166,7 @@ public final class Main {
         try {
             Path path = Path.of(arg);
             if (Files.exists(path)) {
-                detectClassVersion(null, path);
+                detectFileClassVersion(null, path);
                 return;
             }
         } catch (Exception ex) {
