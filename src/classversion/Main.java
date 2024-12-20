@@ -189,7 +189,7 @@ public final class Main {
             detectFileClassVersion(null, path);
             return;
         }
-        System.err.printf("'%s' is not an URL, file or dependency%n", arg);
+        System.err.printf("'%s' is not a file, URL or dependency%n", arg);
     }
 
     public static void main(String[] args) throws IOException {
