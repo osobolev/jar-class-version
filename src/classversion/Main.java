@@ -1,6 +1,5 @@
 package classversion;
 
-import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,9 +44,15 @@ public final class Main {
         return String.format("Java %s (%s.%s)", java, major, minor);
     }
 
-    private static String detectClassVersion(InputStream in) throws IOException {
+    private static String detectClassClassVersion(MagicDetector detected) throws IOException {
+        DataInputStream dis = new DataInputStream(detected.restStream);
+        int minor = dis.readUnsignedShort();
+        int major = dis.readUnsignedShort();
+        return fullVersion(major, minor);
+    }
+
+    private static String detectJarClassVersion(InputStream in) throws IOException {
         try (ZipInputStream zis = new ZipInputStream(in)) {
-            byte[] buf = new byte[8];
             while (true) {
                 ZipEntry entry = zis.getNextEntry();
                 if (entry == null)
@@ -61,33 +66,38 @@ public final class Main {
                     continue;
                 if (name.endsWith("-info.class"))
                     continue;
-                int read = zis.readNBytes(buf, 0, buf.length);
-                if (read < buf.length)
+                MagicDetector detected = MagicDetector.detect(zis);
+                if (detected.fileType != FileType.CLASS)
                     continue;
-                DataInputStream dis = new DataInputStream(new ByteArrayInputStream(buf));
-                int magic = dis.readInt();
-                if (magic != 0xCAFEBABE)
-                    continue;
-                int minor = dis.readUnsignedShort();
-                int major = dis.readUnsignedShort();
-                String version = fullVersion(major, minor);
+                String version = detectClassClassVersion(detected);
                 if (version == null)
                     continue;
                 return version;
             }
         }
-        return "<unknown>";
+        return null;
     }
 
-    private static void detectClassVersion(String name, InputStream in) throws IOException {
-        String version = detectClassVersion(in);
-        System.out.printf("%s: %s%n", name, version);
+    private static void detectClassVersion(boolean warnUndetected, String name, InputStream in) throws IOException {
+        MagicDetector detected = MagicDetector.detect(in);
+        String version;
+        if (detected.fileType == FileType.JAR) {
+            version = detectJarClassVersion(detected.fullStream);
+        } else if (detected.fileType == FileType.CLASS) {
+            version = detectClassClassVersion(detected);
+        } else {
+            if (warnUndetected) {
+                System.err.printf("'%s' is not a JAR or class%n", name);
+            }
+            return;
+        }
+        System.out.printf("%s: %s%n", name, version == null ? "<unknown>" : version);
     }
 
     private static void detectUriClassVersion(String name, URI uri) throws IOException {
         URLConnection conn = uri.toURL().openConnection();
         try (InputStream is = conn.getInputStream()) {
-            detectClassVersion(name, is);
+            detectClassVersion(true, name, is);
         }
     }
 
@@ -100,11 +110,9 @@ public final class Main {
                 }
             }
         } else {
-            if (root != null && !path.getFileName().toString().toLowerCase().endsWith(".jar"))
-                return;
             String name = root == null ? path.toString() : root.relativize(path).toString();
             try (InputStream is = Files.newInputStream(path)) {
-                detectClassVersion(name, is);
+                detectClassVersion(root == null, name, is);
             }
         }
     }
