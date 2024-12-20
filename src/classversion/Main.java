@@ -17,6 +17,7 @@ import java.util.zip.ZipInputStream;
 @SuppressWarnings("UseOfSystemOutOrSystemErr")
 public final class Main {
 
+    private static final Pattern DEPENDENCY_WRAPPER = Pattern.compile("\\w+\\s*\\(\\s*['\"]?(.*)['\"]?\\s*\\)");
     private static final Pattern DEPENDENCY = Pattern.compile("([\\w.]+):([\\w.]+):([\\w.]+)(:[\\w.]+)?");
 
     private static String javaVersion(int major, int minor) {
@@ -122,7 +123,14 @@ public final class Main {
     }
 
     private static void detectClassVersion(String arg) throws IOException {
-        URI mavenUri = dependencyURI(arg);
+        Matcher matcher = DEPENDENCY_WRAPPER.matcher(arg);
+        String depArg;
+        if (matcher.matches()) {
+            depArg = matcher.group(1);
+        } else {
+            depArg = arg;
+        }
+        URI mavenUri = dependencyURI(depArg);
         if (mavenUri != null) {
             detectClassVersion(arg, mavenUri);
             return;
