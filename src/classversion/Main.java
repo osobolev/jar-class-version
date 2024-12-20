@@ -176,6 +176,14 @@ public final class Main {
     }
 
     public static void main(String[] args) throws IOException {
+        if (args.length <= 0) {
+            System.out.println("Usage:");
+            System.out.println("class-version.bat <file>");
+            System.out.println("class-version.bat <URL>");
+            System.out.println("class-version.bat <group>:<artifact>:<version>[:<classifier>]");
+            System.out.println("class-version.bat <scope>(\"<group>:<artifact>:<version>[:<classifier>]\")");
+            return;
+        }
         for (String arg : args) {
             detectClassVersion(arg);
         }
