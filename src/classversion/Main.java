@@ -18,6 +18,7 @@ public final class Main {
 
     private static final Pattern DEPENDENCY_WRAPPER = Pattern.compile("['\"]?\\w+['\"]?\\s*\\(\\s*['\"]?(.*)['\"]?\\s*\\)");
     private static final Pattern DEPENDENCY = Pattern.compile("([\\w.]+):([\\w.]+):([\\w.]+)(:[\\w.]+)?");
+    private static final String MAVEN_BASE_URL = "https://repo1.maven.org/maven2";
 
     private static String javaVersion(int major, int minor) {
         if (major >= 49) {
@@ -129,8 +130,8 @@ public final class Main {
 
         URI toMavenURI() {
             return URI.create(String.format(
-                "https://repo1.maven.org/maven2/%s/%s/%s/%s-%s%s.jar",
-                group.replace('.', '/'), artifact, version,
+                "%s/%s/%s/%s/%s-%s%s.jar",
+                MAVEN_BASE_URL, group.replace('.', '/'), artifact, version,
                 artifact, version, classifier == null ? "" : "-" + classifier
             ));
         }
