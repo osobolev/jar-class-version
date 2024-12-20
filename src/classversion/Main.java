@@ -100,6 +100,8 @@ public final class Main {
                 }
             }
         } else {
+            if (root != null && !path.getFileName().toString().toLowerCase().endsWith(".jar"))
+                return;
             String name = root == null ? path.toString() : root.relativize(path).toString();
             try (InputStream is = Files.newInputStream(path)) {
                 detectClassVersion(name, is);
