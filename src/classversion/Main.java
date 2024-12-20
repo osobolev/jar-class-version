@@ -127,7 +127,16 @@ public final class Main {
     }
 
     private static Dependency parseDependency(String arg) {
-        Matcher matcher = DEPENDENCY.matcher(arg);
+        String depArg;
+        {
+            Matcher matcher = DEPENDENCY_WRAPPER.matcher(arg);
+            if (matcher.matches()) {
+                depArg = matcher.group(1);
+            } else {
+                depArg = arg;
+            }
+        }
+        Matcher matcher = DEPENDENCY.matcher(depArg);
         if (!matcher.matches())
             return null;
         String group = matcher.group(1);
@@ -138,14 +147,7 @@ public final class Main {
     }
 
     private static void detectClassVersion(String arg) throws IOException {
-        Matcher matcher = DEPENDENCY_WRAPPER.matcher(arg);
-        String depArg;
-        if (matcher.matches()) {
-            depArg = matcher.group(1);
-        } else {
-            depArg = arg;
-        }
-        Dependency dep = parseDependency(depArg);
+        Dependency dep = parseDependency(arg);
         if (dep != null) {
             detectClassVersion(dep.toString(), dep.toMavenURI());
             return;
