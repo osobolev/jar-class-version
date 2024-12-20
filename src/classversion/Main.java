@@ -88,7 +88,7 @@ public final class Main {
             version = detectClassClassVersion(detected);
         } else {
             if (warnUndetected) {
-                System.err.printf("'%s' is not a JAR or class%n", name);
+                System.err.printf("'%s' is not a .jar or .class%n", name);
             }
             return;
         }
