@@ -8,17 +8,11 @@ import java.net.URLConnection;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 @SuppressWarnings("UseOfSystemOutOrSystemErr")
 public final class Main {
-
-    private static final Pattern DEPENDENCY_WRAPPER = Pattern.compile("['\"]?\\w+['\"]?\\s*\\(\\s*['\"]?(.*)['\"]?\\s*\\)");
-    private static final Pattern DEPENDENCY = Pattern.compile("([\\w.]+):([\\w.]+):([\\w.]+)(:[\\w.]+)?");
-    private static final String MAVEN_BASE_URL = "https://repo1.maven.org/maven2";
 
     private static String javaVersion(int major, int minor) {
         if (major >= 49) {
@@ -118,47 +112,8 @@ public final class Main {
         }
     }
 
-    private record Dependency(String group, String artifact, String version, String classifier) {
-
-        @Override
-        public String toString() {
-            return String.format(
-                "%s:%s:%s%s",
-                group, artifact, version, classifier == null ? "" : ":" + classifier
-            );
-        }
-
-        URI toMavenURI() {
-            return URI.create(String.format(
-                "%s/%s/%s/%s/%s-%s%s.jar",
-                MAVEN_BASE_URL, group.replace('.', '/'), artifact, version,
-                artifact, version, classifier == null ? "" : "-" + classifier
-            ));
-        }
-    }
-
-    private static Dependency parseDependency(String arg) {
-        String depArg;
-        {
-            Matcher matcher = DEPENDENCY_WRAPPER.matcher(arg);
-            if (matcher.matches()) {
-                depArg = matcher.group(1);
-            } else {
-                depArg = arg;
-            }
-        }
-        Matcher matcher = DEPENDENCY.matcher(depArg);
-        if (!matcher.matches())
-            return null;
-        String group = matcher.group(1);
-        String artifact = matcher.group(2);
-        String version = matcher.group(3);
-        String classifier = matcher.group(4);
-        return new Dependency(group, artifact, version, classifier);
-    }
-
     private static void detectClassVersion(String arg) throws IOException {
-        Dependency dep = parseDependency(arg);
+        Dependency dep = Dependency.parseDependency(arg);
         if (dep != null) {
             detectUriClassVersion(dep.toString(), dep.toMavenURI());
             return;
@@ -200,7 +155,7 @@ public final class Main {
             System.out.println("class-version.bat <URL>");
             System.out.println("  (<URL> can point to a .jar or .class)");
             System.out.println("class-version.bat <group>:<artifact>:<version>[:<classifier>]");
-            System.out.println("  (uses " + MAVEN_BASE_URL + " as a jar source)");
+            System.out.println("  (uses " + Dependency.MAVEN_BASE_URL + " as a jar source)");
             System.out.println("class-version.bat <scope>(\"<group>:<artifact>:<version>[:<classifier>]\")");
             System.out.println("  (<scope> is ignored)");
             return;
