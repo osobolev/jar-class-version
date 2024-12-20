@@ -122,6 +122,7 @@ public final class Main {
         try {
             URI tryUri = URI.create(arg);
             if (tryUri.getScheme() != null) {
+                tryUri.toURL();
                 uri = tryUri;
             }
         } catch (Exception ex) {
