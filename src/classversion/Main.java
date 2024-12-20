@@ -106,19 +106,25 @@ public final class Main {
         }
     }
 
-    private static void detectClassVersion(String arg) throws IOException {
+    private static URI dependencyURI(String arg) {
         Matcher matcher = DEPENDENCY.matcher(arg);
-        if (matcher.matches()) {
-            String group = matcher.group(1);
-            String artifact = matcher.group(2);
-            String version = matcher.group(3);
-            String classifier = matcher.group(4);
-            URI uri = URI.create(String.format(
-                "https://repo1.maven.org/maven2/%s/%s/%s/%s-%s%s.jar",
-                group.replace('.', '/'), artifact, version,
-                artifact, version, classifier == null ? "" : "-" + classifier
-            ));
-            detectClassVersion(arg, uri);
+        if (!matcher.matches())
+            return null;
+        String group = matcher.group(1);
+        String artifact = matcher.group(2);
+        String version = matcher.group(3);
+        String classifier = matcher.group(4);
+        return URI.create(String.format(
+            "https://repo1.maven.org/maven2/%s/%s/%s/%s-%s%s.jar",
+            group.replace('.', '/'), artifact, version,
+            artifact, version, classifier == null ? "" : "-" + classifier
+        ));
+    }
+
+    private static void detectClassVersion(String arg) throws IOException {
+        URI mavenUri = dependencyURI(arg);
+        if (mavenUri != null) {
+            detectClassVersion(arg, mavenUri);
             return;
         }
         try {
