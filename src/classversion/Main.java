@@ -15,7 +15,7 @@ import java.util.zip.ZipInputStream;
 public final class Main {
 
     private static String javaVersion(int major, int minor) {
-        if (major >= 49) {
+        if (major >= 52) {
             return String.valueOf((major - 49) + 5);
         } else if (major >= 46) {
             int subJava = (major - 46) + 2;
